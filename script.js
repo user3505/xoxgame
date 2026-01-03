@@ -1,4 +1,4 @@
-const API_KEY = 'BURAYA_ABLY_API_KEY_GELECEK'; // Ably'den aldığın anahtarı buraya yapıştır.
+const API_KEY = 'nFNW9g.YVm8nA:YenZEZBS47RTDbPGVM58Hrt8v1mRzk6zT-DkzLQHszo'; // Ably'den aldığın anahtarı buraya yapıştır.
 let ably, channel, mySymbol;
 let boardState = Array(9).fill(null);
 let myTurn = false;
