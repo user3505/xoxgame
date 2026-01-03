@@ -3,30 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>XOX Online - Pro</title>
+    <title>XOX Online Pro</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.ably.com/lib/ably.min-1.js"></script>
 </head>
 <body>
     <div id="setup">
         <h1>XOX Online</h1>
-        <p>Bir oda kodu belirle ve arkadaşına gönder.</p>
-        <div class="input-group">
-            <input type="text" id="roomCode" placeholder="Oda Kodu (örn: 1923)">
-            <button onclick="joinRoom()">Odaya Gir</button>
+        <div class="menu-box">
+            <input type="text" id="roomCode" placeholder="Oda Kodu Oluştur/Gir">
+            <div class="button-group">
+                <button onclick="initGame('create')" class="btn-create">Oda Kur (X)</button>
+                <button onclick="initGame('join')" class="btn-join">Odaya Katıl (O)</button>
+            </div>
         </div>
     </div>
 
     <div id="game" style="display:none;">
         <div class="header">
-            <h3>Oda: <span id="displayCode"></span></h3>
+            <h3>Oda: <span id="displayCode"></span> | Rol: <span id="myRole"></span></h3>
             <div class="scoreboard">
-                <div class="score">X: <span id="scoreX">0</span></div>
-                <div class="score">O: <span id="scoreO">0</span></div>
+                <div>X: <span id="scoreX">0</span></div>
+                <div>O: <span id="scoreO">0</span></div>
             </div>
-            <p id="status">Bağlanılıyor...</p>
+            <p id="status">Bağlantı bekleniyor...</p>
         </div>
-
         <div class="board" id="board">
             <div class="cell" onclick="makeMove(0)"></div>
             <div class="cell" onclick="makeMove(1)"></div>
@@ -38,10 +39,8 @@
             <div class="cell" onclick="makeMove(7)"></div>
             <div class="cell" onclick="makeMove(8)"></div>
         </div>
-
-        <button id="resetBtn" onclick="sendReset()" style="display:none;">Tekrar Oyna</button>
+        <button id="resetBtn" onclick="sendReset()" style="display:none;">Yeniden Başlat</button>
     </div>
-
     <script src="script.js"></script>
 </body>
 </html>
