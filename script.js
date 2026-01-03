@@ -1,54 +1,109 @@
-const API_KEY = 'nFNW9g.YVm8nA:YenZEZBS47RTDbPGVM58Hrt8v1mRzk6zT-DkzLQHszo'; // Ably'den aldığın anahtarı buraya yapıştır.
+const ABLY_KEY = 'nFNW9g.YVm8nA:YenZEZBS47RTDbPGVM58Hrt8v1mRzk6zT-DkzLQHszo';
 let ably, channel, mySymbol;
 let boardState = Array(9).fill(null);
 let myTurn = false;
+let gameActive = true;
+let scores = { X: 0, O: 0 };
 
 async function joinRoom() {
     const code = document.getElementById('roomCode').value;
-    if (!code) return alert("Kod girin!");
+    if (!code) return alert("Bir oda kodu girin!");
 
-    ably = new Ably.Realtime(API_KEY);
+    ably = new Ably.Realtime(ABLY_KEY);
     channel = ably.channels.get('room-' + code);
 
+    // Odaya giriş yap
     document.getElementById('setup').style.display = 'none';
     document.getElementById('game').style.display = 'block';
     document.getElementById('displayCode').innerText = code;
 
-    // Odaya ilk giren X, ikinci giren O olur
+    // Kimin X kimin O olacağına karar ver (Presence özelliği)
     channel.presence.get((err, members) => {
-        mySymbol = members.length === 0 ? 'X' : 'O';
+        mySymbol = (members.length === 0) ? 'X' : 'O';
         myTurn = (mySymbol === 'X');
         updateStatus();
     });
     channel.presence.enter();
 
-    // Gelen hamleleri dinle
-    channel.subscribe('move', (message) => {
-        const { index, symbol } = message.data;
-        if (symbol !== mySymbol) {
-            boardState[index] = symbol;
-            renderBoard();
-            myTurn = true;
-            updateStatus();
+    // Mesajları dinle
+    channel.subscribe('move', (msg) => {
+        if (msg.data.symbol !== mySymbol) {
+            applyMove(msg.data.index, msg.data.symbol);
         }
     });
+
+    channel.subscribe('reset', () => resetBoard());
 }
 
 function makeMove(index) {
-    if (!myTurn || boardState[index]) return;
+    if (!gameActive || !myTurn || boardState[index]) return;
 
-    boardState[index] = mySymbol;
-    renderBoard();
+    applyMove(index, mySymbol);
     channel.publish('move', { index, symbol: mySymbol });
     myTurn = false;
     updateStatus();
 }
 
-function renderBoard() {
+function applyMove(index, symbol) {
+    boardState[index] = symbol;
     const cells = document.querySelectorAll('.cell');
-    boardState.forEach((val, i) => cells[i].innerText = val || '');
+    cells[index].innerText = symbol;
+    cells[index].classList.add(symbol);
+    
+    checkWinner();
+    if (gameActive && symbol !== mySymbol) {
+        myTurn = true;
+        updateStatus();
+    }
+}
+
+function checkWinner() {
+    const wins = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+    
+    for (let combo of wins) {
+        const [a, b, c] = combo;
+        if (boardState[a] && boardState[a] === boardState[b] && boardState[a] === boardState[c]) {
+            endGame(boardState[a]);
+            return;
+        }
+    }
+
+    if (!boardState.includes(null)) endGame('draw');
+}
+
+function endGame(result) {
+    gameActive = false;
+    const status = document.getElementById('status');
+    const resetBtn = document.getElementById('resetBtn');
+
+    if (result === 'draw') {
+        status.innerText = "Berabere!";
+    } else {
+        status.innerText = `Kazanan: ${result}`;
+        scores[result]++;
+        document.getElementById(`score${result}`).innerText = scores[result];
+    }
+    resetBtn.style.display = "block";
+}
+
+function sendReset() {
+    channel.publish('reset', {});
+}
+
+function resetBoard() {
+    boardState = Array(9).fill(null);
+    gameActive = true;
+    myTurn = (mySymbol === 'X');
+    
+    document.querySelectorAll('.cell').forEach(cell => {
+        cell.innerText = "";
+        cell.classList.remove('X', 'O');
+    });
+    document.getElementById('resetBtn').style.display = "none";
+    updateStatus();
 }
 
 function updateStatus() {
-    document.getElementById('status').innerText = myTurn ? "Senin Sıran (" + mySymbol + ")" : "Rakip Bekleniyor...";
+    if (!gameActive) return;
+    document.getElementById('status').innerText = myTurn ? "Sıra Sende!" : "Rakip Bekleniyor...";
 }
