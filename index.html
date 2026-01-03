@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title>XOX Online</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.ably.com/lib/ably.min-1.js"></script>
+</head>
+<body>
+    <div id="setup">
+        <h1>XOX Online</h1>
+        <input type="text" id="roomCode" placeholder="Oda Kodu Girin">
+        <button onclick="joinRoom()">Odaya Katıl</button>
+    </div>
+
+    <div id="game" style="display:none;">
+        <h2>Oda: <span id="displayCode"></span></h2>
+        <p id="status">Sıra bekleniyor...</p>
+        <div class="board" id="board">
+            <div class="cell" onclick="makeMove(0)"></div>
+            <div class="cell" onclick="makeMove(1)"></div>
+            <div class="cell" onclick="makeMove(2)"></div>
+            <div class="cell" onclick="makeMove(3)"></div>
+            <div class="cell" onclick="makeMove(4)"></div>
+            <div class="cell" onclick="makeMove(5)"></div>
+            <div class="cell" onclick="makeMove(6)"></div>
+            <div class="cell" onclick="makeMove(7)"></div>
+            <div class="cell" onclick="makeMove(8)"></div>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
